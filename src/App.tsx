@@ -3,7 +3,7 @@ import { CommonDevices } from "./components/common-devices";
 import { CommonResolutions } from "./components/common-resolutions";
 import { CommonScreenSizes } from "./components/common-screen-sizes";
 import { HeroCalculator } from "./components/hero-calculator";
-import { Resources } from "./components/resources";
+// import { Resources } from "./components/resources";
 
 type FilterType = "resolution" | "screen-size" | "device";
 
