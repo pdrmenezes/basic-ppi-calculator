@@ -47,15 +47,15 @@ export function HeroCalculator({
     return parsedData.saved;
   }
 
-  function updateSavedDataOnLocalStorage(newData: { saved: SavedDataType[] }) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newData));
+  function updateSavedDataOnLocalStorage(newData: SavedDataType[]) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ saved: newData }));
   }
 
   function removeSavedData(savedData: SavedDataType) {
     const filteredData = saved.filter((element) => element !== savedData);
     setSaved(filteredData);
 
-    updateSavedDataOnLocalStorage({ saved: filteredData });
+    updateSavedDataOnLocalStorage(filteredData);
   }
 
   function handleCalculate() {
@@ -80,7 +80,7 @@ export function HeroCalculator({
     setPPI(newPPI);
     const newSaved = [...saved, { width, height, inches, ppi: newPPI }];
     setSaved(newSaved);
-    updateSavedDataOnLocalStorage({ saved: newSaved });
+    updateSavedDataOnLocalStorage(newSaved);
   }
 
   useEffect(() => {
