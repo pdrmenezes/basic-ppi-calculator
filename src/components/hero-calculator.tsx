@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { calculatePPI } from "../utils/calculatePPI";
 import { X } from "lucide-react";
 
@@ -22,6 +22,8 @@ type SavedDataType = {
   ppi: string;
 };
 
+const STORAGE_KEY = "basic-ppi-calculator";
+
 export function HeroCalculator({
   height,
   setHeight,
@@ -36,82 +38,120 @@ export function HeroCalculator({
 }: HeroCalculatorProps) {
   const [saved, setSaved] = useState<SavedDataType[]>([]);
 
+  function getSavedDataFromLocalStorage() {
+    const data = localStorage.getItem(STORAGE_KEY);
+    const parsedData: { saved: SavedDataType[] } = data
+      ? JSON.parse(data)
+      : { saved: [] };
+
+    return parsedData.saved;
+  }
+
+  function updateSavedDataOnLocalStorage(newData: { saved: SavedDataType[] }) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newData));
+  }
+
   function removeSavedData(savedData: SavedDataType) {
     const filteredData = saved.filter((element) => element !== savedData);
     setSaved(filteredData);
+
+    updateSavedDataOnLocalStorage({ saved: filteredData });
   }
+
+  function handleCalculate() {
+    setError("");
+    if (!width || !height || !inches) {
+      setError("Oops, forgot one field?");
+      return;
+    }
+
+    const PPI = calculatePPI(Number(width), Number(height), Number(inches));
+    setPPI(PPI);
+  }
+
+  function handleSave() {
+    setError("");
+    if (!width || !height || !inches) {
+      setError("Oops, forgot one field?");
+      return;
+    }
+
+    const newPPI = calculatePPI(Number(width), Number(height), Number(inches));
+    setPPI(newPPI);
+    const newSaved = [...saved, { width, height, inches, ppi: newPPI }];
+    setSaved(newSaved);
+    updateSavedDataOnLocalStorage({ saved: newSaved });
+  }
+
+  useEffect(() => {
+    const storedData = getSavedDataFromLocalStorage();
+    setSaved(storedData);
+  }, []);
 
   return (
     <>
-      <div className="mb-4 text-center">
-        <h1 className="text-5xl font-semibold">PPI Calculator</h1>
-        <span className="text-sm font-light">
-          - the screen's pixel density -
-        </span>
+      <div className="w-full max-w-2xl mx-auto">
+        <form className="space-y-6">
+          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
+            <div className="space-y-2">
+              <label htmlFor="width" className="p-2">
+                Width
+              </label>
+              <input
+                type="number"
+                placeholder="1920"
+                min="0"
+                max="99999"
+                name="width"
+                id="width"
+                value={width}
+                onChange={(e) => setWidth(e.target.value)}
+                className="text-neutral-200 p-2 h-10 bg-transparent border-b border-b-neutral-200 w-full"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="height" className="p-2">
+                Height
+              </label>
+              <input
+                type="number"
+                placeholder="1080"
+                min="0"
+                max="99999"
+                name="height"
+                id="height"
+                value={height}
+                onChange={(e) => setHeight(e.target.value)}
+                className="text-neutral-200 p-2 h-10 bg-transparent border-b border-b-neutral-200 w-full"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="inches" className="p-2">
+                Inches
+              </label>
+              <input
+                type="number"
+                placeholder="27"
+                lang="en-EN"
+                min="0"
+                max="120"
+                name="inches"
+                id="inches"
+                value={inches}
+                onChange={(e) => setInches(e.target.value)}
+                className="text-neutral-200 p-2 h-10 bg-transparent border-b border-b-neutral-200 w-full"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleCalculate}
+              className="px-3 py-1.5 rounded-md border border-neutral-200 bg-neutral-200 text-neutral-900 hover:bg-neutral-300"
+            >
+              Calculate
+            </button>
+          </div>
+        </form>
       </div>
-
-      <form className="grid grid-cols-[100px,10px,100px,60px,110px] grid-rows-2 gap-x-4 w-full justify-center items-baseline">
-        <label htmlFor="width">Width</label>
-        <span></span>
-        <label htmlFor="height">Height</label>
-        <label htmlFor="inches">Inches</label>
-        <span></span>
-        <input
-          className="text-neutral-200 p-2 h-10 bg-transparent border-b border-b-neutral-200"
-          type="number"
-          placeholder="1920"
-          min="0"
-          max="99999"
-          name="width"
-          id="width"
-          value={width}
-          onChange={(e) => setWidth(e.target.value)}
-        />
-        <p>x</p>
-        <input
-          className="text-neutral-200 p-2 h-10 bg-transparent border-b border-b-neutral-200"
-          type="number"
-          placeholder="1080"
-          min="0"
-          max="99999"
-          name="height"
-          id="height"
-          value={height}
-          onChange={(e) => setHeight(e.target.value)}
-        />
-        <input
-          className="text-neutral-200 p-2 h-10 bg-transparent border-b border-b-neutral-200"
-          type="number"
-          placeholder="27"
-          lang="en-EN"
-          min="0"
-          max="120"
-          name="inches"
-          id="inches"
-          value={inches}
-          onChange={(e) => setInches(e.target.value)}
-        />
-        <button
-          type="button"
-          onClick={() => {
-            setError("");
-            if (!width || !height || !inches) {
-              setError("Oops, forgot one field?");
-              return;
-            }
-
-            const PPI = calculatePPI(
-              Number(width),
-              Number(height),
-              Number(inches)
-            );
-            setPPI(PPI);
-          }}
-          className="px-3 py-1.5 rounded-md border border-neutral-200 bg-neutral-200 text-neutral-900 hover:bg-neutral-300"
-        >
-          Calculate
-        </button>
-      </form>
       {error.length > 0 && (
         <small className="text-amber-500 mx-auto my-2">{error}</small>
       )}
@@ -124,21 +164,7 @@ export function HeroCalculator({
         </div>
         <button
           type="button"
-          onClick={async () => {
-            setError("");
-            if (!width || !height || !inches) {
-              setError("Oops, forgot one field?");
-              return;
-            }
-
-            const newPPI = calculatePPI(
-              Number(width),
-              Number(height),
-              Number(inches)
-            );
-            setPPI(newPPI);
-            setSaved([...saved, { width, height, inches, ppi: newPPI }]);
-          }}
+          onClick={handleSave}
           className="px-3 py-1.5 w-24 h-10 rounded-md border border-neutral-200 bg-neutral-200 text-neutral-900 hover:bg-neutral-300"
         >
           Save
@@ -168,12 +194,12 @@ export function HeroCalculator({
       {/* <div className="my-5">
         <small>
           <p>
-            In an attempt to simplify this wild information, some resolutions or
+            In an attempt to simplify these wild information, some resolutions or
             specifics may be missing like (XGA, WXGA, HD+ or pixel formats,
             etc.)
           </p>
           <p>
-            Companies shouldn't be able to advertise as they do, wher everything
+            Companies shouldn't be able to advertise as they do, where everything
             is ULTRA HIGH DEFINITION IMPRESSIVE WOW 16 MILION PIXELS 16K
           </p>
         </small>

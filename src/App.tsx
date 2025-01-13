@@ -17,7 +17,13 @@ export function App() {
 
   return (
     <main className="bg-neutral-900 text-neutral-200">
-      <div className="flex flex-col space-y-5 max-w-screen-xl mx-auto min-h-screen pt-[30vh] pb-10 items-center">
+      <div className="flex flex-col space-y-5 max-w-screen-xl mx-auto min-h-screen p-6 sm:pt-[30vh] items-center">
+        <div className="mb-4 text-center">
+          <h1 className="text-5xl font-semibold">PPI Calculator</h1>
+          <span className="text-sm font-light">
+            - the screen's pixel density -
+          </span>
+        </div>
         <HeroCalculator
           height={height}
           setHeight={setHeight}
@@ -30,7 +36,7 @@ export function App() {
           error={error}
           setError={setError}
         />
-        <section className="flex gap-6 font-bold">
+        <section className="flex gap-6 flex-wrap font-bold">
           <h3
             onClick={() => setFilter(null)}
             className={"cursor-pointer underline-offset-8 hover:underline"}
