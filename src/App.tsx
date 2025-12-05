@@ -17,7 +17,7 @@ export function App() {
 
   return (
     <main className="bg-neutral-900 text-neutral-200">
-      <div className="flex flex-col space-y-5 max-w-screen-xl mx-auto min-h-screen p-6 sm:pt-[30vh] items-center">
+      <div className="flex flex-col space-y-5 max-w-(--breakpoint-xl) mx-auto min-h-screen p-6 sm:pt-[30vh] items-center">
         <div className="mb-4 text-center">
           <h1 className="text-5xl font-semibold">PPI Calculator</h1>
           <span className="text-sm font-light">
