@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { calculatePPI } from "../utils/calculatePPI";
-import { X } from "lucide-react";
 
 type HeroCalculatorProps = {
   width: string;
@@ -176,17 +175,18 @@ export function HeroCalculator({
           saved.map((savedResolution) => (
             <div
               key={savedResolution.ppi}
-              className="flex items-center gap-2 py-1.5 px-2.5 rounded-md bg-neutral-800"
+              className="flex gap-1.5 py-1.5 px-2.5 rounded-md bg-neutral-800"
             >
               <span className="text-neutral-300">
                 {savedResolution.width} x {savedResolution.height} /{" "}
                 {savedResolution.inches} Inches / PPI: {savedResolution.ppi}
               </span>
-              <button type="button">
-                <X
-                  onClick={() => removeSavedData(savedResolution)}
-                  className="size-4 text-neutral-400 hover:text-neutral-300"
-                />
+              <button
+                className="inline-flex px-2 hover:bg-neutral-700/50 cursor-pointer text-neutral-200 rounded-md items-center"
+                type="button"
+                onClick={() => removeSavedData(savedResolution)}
+              >
+                x
               </button>
             </div>
           ))}
