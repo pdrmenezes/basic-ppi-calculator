@@ -1,0 +1,64 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+# Needed so the workflow can push to the "deploy" branch
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Vite + React app
+        run: npm run build
+
+      - name: Deploy build output to "deploy" branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+
+          # Configure git identity for the commit
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Work in a separate directory so the build output in ./dist
+          # isn't touched by branch switching
+          mkdir -p /tmp/deploy-branch
+          cp -r dist/. /tmp/deploy-branch/
+
+          # Fetch the deploy branch if it exists remotely, otherwise start it fresh
+          if git ls-remote --exit-code --heads origin deploy > /dev/null 2>&1; then
+            git fetch origin deploy
+            git checkout deploy
+            # Remove tracked files so deleted/renamed build assets don't linger,
+            # but this keeps full commit history (no orphan reset, no force-push)
+            git rm -rf . > /dev/null 2>&1 || true
+          else
+            git checkout --orphan deploy
+            git rm -rf . > /dev/null 2>&1 || true
+          fi
+
+          # Copy the freshly built files back in and commit with a timestamp
+          cp -r /tmp/deploy-branch/. .
+          git add -A
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          git commit -m "Deploy ${TIMESTAMP} (from ${{ github.sha }})" --allow-empty
+          git push origin deploy
